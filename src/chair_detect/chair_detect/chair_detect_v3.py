@@ -107,7 +107,7 @@ class ChairLot:
     # start point: bottom right, bottom left, top left, top right
     startpt = np.array([[374,242],[65,242],[155,120],[355,120]])
     # end point: bottom right, bottom left, top left, top right
-    endpt = np.array([[605,485],[312,485],[320,195],[500,190]])
+    endpt = np.array([[605,485],[312,485],[320,195],[520,190]])
     # text position for status
     txtpos = np.array([[386,260],[77,260],[167,138],[367,138]])
     # chairlot status: True for chair in lot, False for chair not in lot
