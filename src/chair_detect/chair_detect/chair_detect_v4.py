@@ -63,7 +63,7 @@ class ChairDetector(Node):
       required=False,
       default='/home/xinyi/testOccupancyP4/detectchair/src/chair_detect/chair_detect/efficientdet_lite0.tflite')
     parser.add_argument(
-      '--cameraId', help='Id of camera.', required=False, type=int, default=2)
+      '--cameraId', help='Id of camera.', required=False, type=int, default=0)
     parser.add_argument(
       '--frameWidth',
       help='Width of frame to capture from camera.',
