@@ -43,60 +43,6 @@ class ChairDetector(Node):
   def __init__(self):
     super().__init__('chair_detector')
     self.publisher_ = self.create_publisher(Int8MultiArray, 'sod_topic', 10)
-    timer_period = 0.5 
-    self.timer = self.create_timer(timer_period, self.publishing)
-    self.i = 0
-  
-  def publishing(self): 
-    # Publish the coordinates of the detected chairs to a ROS topic
-    # Publish the status of the chair lot box to a ROS topic
-    point_msg = Int8MultiArray()
-
-    # Sets arguments for parsing
-    parser = argparse.ArgumentParser(
-      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-      '--model',
-      help='Path of the object detection model.',
-      required=False,
-      default='/home/xinyi/testOccupancyP4/detectchair/src/chair_detect/chair_detect/efficientdet_lite0.tflite')
-    parser.add_argument(
-      '--cameraId', help='Id of camera.', required=False, type=int, default=2)
-    parser.add_argument(
-      '--frameWidth',
-      help='Width of frame to capture from camera.',
-      required=False,
-      type=int,
-      default=640)
-    parser.add_argument(
-      '--frameHeight',
-      help='Height of frame to capture from camera.',
-      required=False,
-      type=int,
-      default=480)
-    parser.add_argument(
-      '--numThreads',
-      help='Number of CPU threads to run the model.',
-      required=False,
-      type=int,
-      default=4)
-    parser.add_argument(
-      '--enableEdgeTPU',
-      help='Whether to run the model on EdgeTPU.',
-      action='store_true',
-      required=False,
-      default=False)
-    args = parser.parse_args()
-    run(args.model, int(args.cameraId), args.frameWidth, args.frameHeight,
-        int(args.numThreads), bool(args.enableEdgeTPU))
-    # Assign values from detected_chairs list to point_msg
-    cl = ChairLot()
-    point_msg.data = cl.status
-    self.publisher_.publish(point_msg)
-    # self.get_logger().info('Publishing: "%s"' % point_msg.data)
-    self.i += 1
-
-
 
 class ChairLot:
     # line thickness
@@ -172,7 +118,7 @@ class ChairLot:
 
 def visualize(
     image: np.ndarray,
-    detection_result: processor.DetectionResult,
+    detection_result: processor.DetectionResult
 ) -> np.ndarray:
     """Draws bounding boxes on the input image and return it.
 
@@ -185,7 +131,6 @@ def visualize(
     """
 
     cl = ChairLot()
-
     cl.drawBox(image)
     
     for detection in detection_result.detections:
@@ -257,6 +202,10 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
   options = vision.ObjectDetectorOptions(
       base_options=base_options, detection_options=detection_options)
   detector = vision.ObjectDetector.create_from_options(options)
+  
+  # Initialization of ROS2 node
+  rclpy.init()
+  chair_detector = ChairDetector()
 
   # Continuously capture images from the camera and run inference
   while cap.isOpened():
@@ -292,25 +241,63 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
     text_location = (left_margin, row_size)
     cv2.putText(image, fps_text, text_location, cv2.FONT_HERSHEY_PLAIN,
                 font_size, text_color, font_thickness)
+    
+    # chair_detector = ChairDetector()
+    point_msg = Int8MultiArray()
+    point_msg.data = ChairLot().status
+    chair_detector.publisher_.publish(point_msg)
 
     # Stop the program if the ESC key is pressed.
     if cv2.waitKey(1) == 27:
       break
     cv2.imshow('object_detector', image)
-
+    
+  # Destroys ROS2 node
+  chair_detector.destroy_node()
+  rclpy.shutdown()
   cap.release()
   cv2.destroyAllWindows()
 
 
 
 def main():
-  # Initialization of ROS2 node
-  rclpy.init()
-  chair_detector = ChairDetector()
-  rclpy.spin(chair_detector)  
-  # Destroys ROS2 node
-  chair_detector.destroy_node()
-  rclpy.shutdown()
+  # Sets arguments for parsing
+  parser = argparse.ArgumentParser(
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser.add_argument(
+    '--model',
+    help='Path of the object detection model.',
+    required=False,
+    default='/home/xinyi/testOccupancyP4/detectchair/src/chair_detect/chair_detect/efficientdet_lite0.tflite')
+  parser.add_argument(
+    '--cameraId', help='Id of camera.', required=False, type=int, default=2)
+  parser.add_argument(
+    '--frameWidth',
+    help='Width of frame to capture from camera.',
+    required=False,
+    type=int,
+    default=640)
+  parser.add_argument(
+    '--frameHeight',
+    help='Height of frame to capture from camera.',
+    required=False,
+    type=int,
+    default=480)
+  parser.add_argument(
+    '--numThreads',
+    help='Number of CPU threads to run the model.',
+    required=False,
+    type=int,
+    default=4)
+  parser.add_argument(
+    '--enableEdgeTPU',
+    help='Whether to run the model on EdgeTPU.',
+    action='store_true',
+    required=False,
+    default=False)
+  args = parser.parse_args()
+  run(args.model, int(args.cameraId), args.frameWidth, args.frameHeight,
+      int(args.numThreads), bool(args.enableEdgeTPU))
 
 
 

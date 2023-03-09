@@ -21,7 +21,7 @@ setup(
     entry_points={
         'console_scripts': [ 
             'chair_detect = chair_detect.chair_detect_v3:main',
-            'chair_detect_2 = chair_detect.chair_detect_v5:main'
+            'chair_detect_2 = chair_detect.chair_detect_v4:main'
         ],
     },
 )
