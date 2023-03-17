@@ -22,8 +22,4 @@ Note: This repository is an add on from this [repository](https://github.com/mon
 ## Expected Outcome
 
 
-https://user-images.githubusercontent.com/59643277/225886229-e476ff65-6443-46d1-ac86-252dc6de4a06.mp4
-
-
-
 [^1]: Parking Lot for Chairs
